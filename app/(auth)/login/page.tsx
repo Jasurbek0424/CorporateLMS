@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   ShieldCheck,
   Sparkles,
@@ -46,11 +46,9 @@ const ROLE_CARDS: {
   },
 ];
 
-export default function LoginPage() {
+function AutoLoginFromQuery() {
   const router = useRouter();
   const params = useSearchParams();
-  const [loading, setLoading] = useState<Role | null>(null);
-
   useEffect(() => {
     const as = params.get("as");
     const target = ROLE_CARDS.find((r) => r.id === as);
@@ -59,6 +57,12 @@ export default function LoginPage() {
       router.replace(target.destination);
     }
   }, [params, router]);
+  return null;
+}
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState<Role | null>(null);
 
   function enter(role: Role, destination: string) {
     setLoading(role);
@@ -68,6 +72,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-bg flex">
+      <Suspense fallback={null}>
+        <AutoLoginFromQuery />
+      </Suspense>
       {/* Left: brand panel */}
       <div className="hidden lg:flex w-[44%] xl:w-[42%] relative overflow-hidden bg-brand-700 text-white">
         <div className="absolute inset-0 opacity-[0.15] [background-image:radial-gradient(circle_at_25%_15%,white_0,transparent_45%),radial-gradient(circle_at_85%_85%,white_0,transparent_40%)]" />
