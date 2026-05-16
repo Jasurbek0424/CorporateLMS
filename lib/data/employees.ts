@@ -1,0 +1,166 @@
+import type { Employee, EmployeeCourseEntry } from "@/lib/types";
+
+export const employees: Employee[] = [
+  {
+    id: "e-4128",
+    fullName: "Олимов Аброр Дилшодович",
+    initials: "ОА",
+    position: "Оператор линии",
+    departmentId: "d-prod-2",
+    tenure: "3 г 4 мес",
+    avgScore: 82,
+    required: { done: 6, total: 8 },
+    assigned: 14,
+    completed: 11,
+  },
+  {
+    id: "e-3091",
+    fullName: "Каримова Зарина Бахтиёровна",
+    initials: "КЗ",
+    position: "Старший бухгалтер",
+    departmentId: "d-fin",
+    tenure: "5 л 2 мес",
+    avgScore: 91,
+    required: { done: 8, total: 8 },
+    assigned: 12,
+    completed: 12,
+  },
+  {
+    id: "e-2274",
+    fullName: "Турсунов Дилмурод Эркинович",
+    initials: "ТД",
+    position: "Начальник смены",
+    departmentId: "d-prod-1",
+    tenure: "7 л 8 мес",
+    avgScore: 87,
+    required: { done: 7, total: 7 },
+    assigned: 16,
+    completed: 14,
+  },
+  {
+    id: "e-5662",
+    fullName: "Юлдашева Нилуфар Шерзодовна",
+    initials: "ЮН",
+    position: "Кладовщик",
+    departmentId: "d-log",
+    tenure: "1 г 6 мес",
+    avgScore: 74,
+    required: { done: 4, total: 6 },
+    assigned: 9,
+    completed: 6,
+  },
+  {
+    id: "e-7811",
+    fullName: "Назаров Шохрух Бахтиёрович",
+    initials: "НШ",
+    position: "Инженер по безопасности",
+    departmentId: "d-safety",
+    tenure: "2 г 1 мес",
+    avgScore: 79,
+    required: { done: 5, total: 7 },
+    assigned: 11,
+    completed: 8,
+  },
+  {
+    id: "e-9134",
+    fullName: "Рахимова Гулноза Алишеровна",
+    initials: "РГ",
+    position: "HR-менеджер",
+    departmentId: "d-hr",
+    tenure: "4 г",
+    avgScore: 95,
+    required: { done: 6, total: 6 },
+    assigned: 10,
+    completed: 10,
+  },
+  {
+    id: "e-1023",
+    fullName: "Хамидов Жасур Шавкатович",
+    initials: "ХЖ",
+    position: "Системный администратор",
+    departmentId: "d-it",
+    tenure: "6 л",
+    avgScore: 88,
+    required: { done: 7, total: 7 },
+    assigned: 13,
+    completed: 11,
+  },
+  {
+    id: "e-2547",
+    fullName: "Эргашев Бахром Кахрамонович",
+    initials: "ЭБ",
+    position: "Геолог",
+    departmentId: "d-geo",
+    tenure: "9 л",
+    avgScore: 81,
+    required: { done: 5, total: 5 },
+    assigned: 8,
+    completed: 7,
+  },
+  {
+    id: "e-4099",
+    fullName: "Саидова Дилфуза Рустамовна",
+    initials: "СД",
+    position: "Менеджер по закупкам",
+    departmentId: "d-buy",
+    tenure: "2 г 9 мес",
+    avgScore: 76,
+    required: { done: 4, total: 5 },
+    assigned: 9,
+    completed: 6,
+  },
+  {
+    id: "e-6618",
+    fullName: "Алиев Тимур Икромович",
+    initials: "АТ",
+    position: "Электромонтёр",
+    departmentId: "d-prod-1",
+    tenure: "11 л",
+    avgScore: 90,
+    required: { done: 7, total: 7 },
+    assigned: 12,
+    completed: 12,
+  },
+  {
+    id: "e-7704",
+    fullName: "Шарипова Малика Анваровна",
+    initials: "ШМ",
+    position: "Аналитик",
+    departmentId: "d-fin",
+    tenure: "2 г",
+    avgScore: 84,
+    required: { done: 5, total: 6 },
+    assigned: 10,
+    completed: 7,
+  },
+];
+
+export const employeeCourseMatrix: Record<string, EmployeeCourseEntry[]> = {
+  "e-4128": [
+    { courseId: "c-safety-area", status: "completed", progress: 100, score: 95, completedAt: "2026-03-02" },
+    { courseId: "c-erp-prod", status: "in_progress", progress: 42, dueDate: "2026-06-15" },
+    { courseId: "c-incoming", status: "completed", progress: 100, score: 88, completedAt: "2026-02-21" },
+    { courseId: "c-comp-lit", status: "overdue", progress: 18, dueDate: "2026-05-30" },
+    { courseId: "c-ai-lit", status: "not_started", progress: 0 },
+    { courseId: "c-excel", status: "completed", progress: 100, score: 78, completedAt: "2026-02-14" },
+    { courseId: "c-norm-exam", status: "overdue", progress: 100, score: 54, completedAt: "2026-03-08" },
+  ],
+  "e-3091": [
+    { courseId: "c-safety-area", status: "completed", progress: 100, score: 96, completedAt: "2026-01-19" },
+    { courseId: "c-comp-lit", status: "completed", progress: 100, score: 92, completedAt: "2026-02-12" },
+    { courseId: "c-excel", status: "completed", progress: 100, score: 94, completedAt: "2026-02-28" },
+    { courseId: "c-safe-net", status: "in_progress", progress: 60, dueDate: "2026-07-01" },
+  ],
+};
+
+export function getEmployeeById(id: string): Employee | undefined {
+  return employees.find((e) => e.id === id);
+}
+
+export function getEmployeeCourses(employeeId: string): EmployeeCourseEntry[] {
+  return employeeCourseMatrix[employeeId] ?? [];
+}
+
+export function getEmployeesByDepartment(departmentId: string): Employee[] {
+  return employees.filter((e) => e.departmentId === departmentId);
+}
