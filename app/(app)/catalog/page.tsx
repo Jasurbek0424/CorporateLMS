@@ -7,15 +7,17 @@ import { CourseCard } from "@/components/features/catalog/CourseCard";
 import { api } from "@/lib/api";
 import type { Course, CourseStatus } from "@/lib/types";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n";
+import type { DictKey } from "@/lib/i18n/uz";
 
 type Filter = "all" | "required" | "in_progress" | "completed" | "overdue";
 
-const FILTERS: { id: Filter; label: string }[] = [
-  { id: "all", label: "Все" },
-  { id: "required", label: "Обязательные" },
-  { id: "in_progress", label: "В процессе" },
-  { id: "completed", label: "Завершённые" },
-  { id: "overdue", label: "Просроченные" },
+const FILTERS: { id: Filter; labelKey: DictKey }[] = [
+  { id: "all", labelKey: "catalog.filter.all" },
+  { id: "required", labelKey: "catalog.filter.required" },
+  { id: "in_progress", labelKey: "catalog.filter.in_progress" },
+  { id: "completed", labelKey: "catalog.filter.completed" },
+  { id: "overdue", labelKey: "catalog.filter.overdue" },
 ];
 
 function matches(course: Course, f: Filter): boolean {
@@ -25,6 +27,7 @@ function matches(course: Course, f: Filter): boolean {
 }
 
 export default function CatalogPage() {
+  const { t, locale } = useT();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
@@ -43,13 +46,15 @@ export default function CatalogPage() {
     return courses.filter((c) => {
       if (!matches(c, filter)) return false;
       if (!q) return true;
+      const title = (locale === "uz" && c.titleUz ? c.titleUz : c.title).toLowerCase();
+      const cat = (locale === "uz" && c.categoryUz ? c.categoryUz : c.category).toLowerCase();
       return (
-        c.title.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q) ||
-        c.tags.some((t) => t.toLowerCase().includes(q))
+        title.includes(q) ||
+        cat.includes(q) ||
+        c.tags.some((tag) => tag.toLowerCase().includes(q))
       );
     });
-  }, [courses, filter, query]);
+  }, [courses, filter, query, locale]);
 
   const stats = useMemo(() => {
     const required = courses.filter((c) => c.required).length;
@@ -62,9 +67,9 @@ export default function CatalogPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Мои курсы"
-        title="Каталог обучения"
-        description="Назначенные и рекомендованные программы. Срок прохождения и напоминания настраивает администратор."
+        eyebrow={t("catalog.eyebrow")}
+        title={t("catalog.title")}
+        description={t("catalog.desc")}
         actions={
           <div className="flex items-center gap-2">
             <div className="inline-flex p-0.5 rounded-lg border border-border-strong bg-white">
@@ -75,7 +80,7 @@ export default function CatalogPage() {
                   view === "grid" ? "bg-brand-50 text-brand-700" : "text-ink-soft hover:text-ink",
                 )}
               >
-                <LayoutGrid size={14} /> Сетка
+                <LayoutGrid size={14} /> {t("catalog.view.grid")}
               </button>
               <button
                 onClick={() => setView("list")}
@@ -84,7 +89,7 @@ export default function CatalogPage() {
                   view === "list" ? "bg-brand-50 text-brand-700" : "text-ink-soft hover:text-ink",
                 )}
               >
-                <Rows3 size={14} /> Список
+                <Rows3 size={14} /> {t("catalog.view.list")}
               </button>
             </div>
           </div>
@@ -92,10 +97,10 @@ export default function CatalogPage() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <StatTile label="Обязательных" value={stats.required} tone="blue" />
-        <StatTile label="В процессе" value={stats.inProgress} tone="amber" />
-        <StatTile label="Завершено" value={stats.completed} tone="green" />
-        <StatTile label="Просрочено" value={stats.overdue} tone="red" />
+        <StatTile label={t("catalog.stat.required")} value={stats.required} tone="blue" />
+        <StatTile label={t("catalog.stat.inProgress")} value={stats.inProgress} tone="amber" />
+        <StatTile label={t("catalog.stat.completed")} value={stats.completed} tone="green" />
+        <StatTile label={t("catalog.stat.overdue")} value={stats.overdue} tone="red" />
       </div>
 
       <div className="card !p-3 mb-5 flex flex-wrap items-center gap-2">
@@ -104,7 +109,7 @@ export default function CatalogPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск по названию, категории или тегу"
+            placeholder={t("catalog.search.placeholder")}
             className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-alt border border-transparent text-sm placeholder:text-ink-mute focus:bg-white focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-50"
           />
         </div>
@@ -121,7 +126,7 @@ export default function CatalogPage() {
                   : "bg-white text-ink-soft border-border hover:border-brand-300 hover:text-ink",
               )}
             >
-              {f.label}
+              {t(f.labelKey)}
             </button>
           ))}
         </div>
@@ -135,7 +140,7 @@ export default function CatalogPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="card py-16 text-center">
-          <div className="text-sm text-ink-soft">Курсы по вашему фильтру не найдены.</div>
+          <div className="text-sm text-ink-soft">{t("catalog.empty")}</div>
         </div>
       ) : view === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

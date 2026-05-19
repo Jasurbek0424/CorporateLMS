@@ -2,21 +2,23 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Award, Briefcase, Building2, Clock, Mail, MessageSquare } from "lucide-react";
+import { ArrowLeft, Award, Briefcase, Building2, Mail, MessageSquare } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Avatar } from "@/components/ui/Avatar";
 import { EmployeeCoursesTable } from "@/components/features/employee/EmployeeCoursesTable";
 import { api } from "@/lib/api";
-import { getDepartmentById, getDepartmentPath } from "@/lib/data";
+import { getDepartmentPath } from "@/lib/data";
 import type { Course, Employee, EmployeeCourseEntry } from "@/lib/types";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n";
+import type { DictKey } from "@/lib/i18n/uz";
 
-const TABS = [
-  { id: "courses", label: "Курсы" },
-  { id: "progress", label: "Прогресс" },
-  { id: "tests", label: "Тесты" },
-  { id: "certificates", label: "Сертификаты" },
-] as const;
+const TABS: { id: "courses" | "progress" | "tests" | "certificates"; labelKey: DictKey }[] = [
+  { id: "courses", labelKey: "emp.tab.courses" },
+  { id: "progress", labelKey: "emp.tab.progress" },
+  { id: "tests", labelKey: "emp.tab.tests" },
+  { id: "certificates", labelKey: "emp.tab.certificates" },
+];
 
 type TabId = (typeof TABS)[number]["id"];
 
@@ -26,6 +28,7 @@ export default function EmployeeCardPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { t, locale } = useT();
   const [data, setData] = useState<{
     employee: Employee;
     entries: EmployeeCourseEntry[];
@@ -45,8 +48,9 @@ export default function EmployeeCardPage({
   }
 
   const { employee, entries, courses } = data;
-  const dep = getDepartmentById(employee.departmentId);
-  const depPath = getDepartmentPath(employee.departmentId);
+  const depPath = getDepartmentPath(employee.departmentId, locale);
+  const position = locale === "uz" && employee.positionUz ? employee.positionUz : employee.position;
+  const tenure = locale === "uz" && employee.tenureUz ? employee.tenureUz : employee.tenure;
 
   return (
     <>
@@ -54,7 +58,7 @@ export default function EmployeeCardPage({
         href="/team"
         className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-soft hover:text-brand-700 mb-4"
       >
-        <ArrowLeft size={14} /> Назад к сотрудникам
+        <ArrowLeft size={14} /> {t("emp.back")}
       </Link>
 
       <div className="card !p-6 mb-5">
@@ -63,13 +67,13 @@ export default function EmployeeCardPage({
             <Avatar initials={employee.initials} tone="blue" size="lg" />
             <div>
               <h1 className="text-[26px] font-bold tracking-tight leading-tight">{employee.fullName}</h1>
-              <p className="text-ink-soft text-[14px] mt-1">{employee.position}</p>
+              <p className="text-ink-soft text-[14px] mt-1">{position}</p>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-3 text-[13px] text-ink-soft">
                 <span className="inline-flex items-center gap-1.5">
                   <Building2 size={13} /> {depPath}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Briefcase size={13} /> Стаж {employee.tenure}
+                  <Briefcase size={13} /> {t("emp.tenure", { tenure })}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <Mail size={13} /> {employee.id.replace("e-", "")}@marsforge.uz
@@ -81,7 +85,7 @@ export default function EmployeeCardPage({
           <div className="flex items-start gap-6">
             <div className="text-right">
               <div className="text-[10.5px] uppercase tracking-[0.14em] font-semibold text-ink-mute">
-                Средний балл
+                {t("emp.avgScore")}
               </div>
               <div className="text-[44px] font-bold leading-none tabular-nums tracking-tight mt-1 text-brand-700">
                 {employee.avgScore}
@@ -89,54 +93,52 @@ export default function EmployeeCardPage({
             </div>
             <div className="flex flex-col gap-2">
               <button className="btn btn-outline !h-9">
-                <MessageSquare size={14} /> Написать
+                <MessageSquare size={14} /> {t("emp.write")}
               </button>
               <button className="btn btn-primary !h-9">
-                <Award size={14} /> Назначить курс
+                <Award size={14} /> {t("emp.assignCourse")}
               </button>
             </div>
           </div>
         </div>
 
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Stat label="Обязательные" value={`${employee.required.done} / ${employee.required.total}`} />
-          <Stat label="Назначено" value={employee.assigned} />
-          <Stat label="Завершено" value={employee.completed} />
-          <Stat label="В работе" value={employee.assigned - employee.completed} />
+          <Stat label={t("emp.stat.required")} value={`${employee.required.done} / ${employee.required.total}`} />
+          <Stat label={t("emp.stat.assigned")} value={employee.assigned} />
+          <Stat label={t("emp.stat.completed")} value={employee.completed} />
+          <Stat label={t("emp.stat.inWork")} value={employee.assigned - employee.completed} />
         </div>
       </div>
 
       <div className="border-b border-border mb-4">
         <div className="flex items-center gap-1">
-          {TABS.map((t) => (
+          {TABS.map((tb) => (
             <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
+              key={tb.id}
+              onClick={() => setTab(tb.id)}
               className={cn(
                 "px-4 h-10 text-[13.5px] font-medium border-b-2 -mb-px transition",
-                tab === t.id
+                tab === tb.id
                   ? "border-brand-600 text-brand-700"
                   : "border-transparent text-ink-soft hover:text-ink",
               )}
             >
-              {t.label}
+              {t(tb.labelKey)}
             </button>
           ))}
         </div>
       </div>
 
       {tab === "courses" && <EmployeeCoursesTable entries={entries} courses={courses} />}
-      {tab === "progress" && (
-        <ProgressTab entries={entries} courses={courses} />
-      )}
+      {tab === "progress" && <ProgressTab entries={entries} courses={courses} />}
       {tab === "tests" && (
         <div className="card !p-10 text-center text-ink-soft text-sm">
-          В демо-версии данные по тестам объединены с вкладкой «Курсы».
+          {t("emp.tests.placeholder")}
         </div>
       )}
       {tab === "certificates" && (
         <div className="card !p-10 text-center text-ink-soft text-sm">
-          Сертификаты появляются автоматически после успешной сдачи аттестации.
+          {t("emp.cert.placeholder")}
         </div>
       )}
     </>
@@ -155,16 +157,19 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 function ProgressTab({ entries, courses }: { entries: EmployeeCourseEntry[]; courses: Course[] }) {
+  const { locale } = useT();
   return (
     <div className="card !p-5 space-y-3">
       {entries.map((e) => {
         const course = courses.find((c) => c.id === e.courseId);
         if (!course) return null;
+        const title = locale === "uz" && course.titleUz ? course.titleUz : course.title;
+        const category = locale === "uz" && course.categoryUz ? course.categoryUz : course.category;
         return (
           <div key={e.courseId} className="grid grid-cols-[1fr_240px_60px] gap-4 items-center">
             <div className="min-w-0">
-              <div className="text-[13.5px] font-semibold truncate">{course.title}</div>
-              <div className="text-[11.5px] text-ink-mute">{course.category}</div>
+              <div className="text-[13.5px] font-semibold truncate">{title}</div>
+              <div className="text-[11.5px] text-ink-mute">{category}</div>
             </div>
             <div>
               <div className="h-1.5 rounded-full bg-surface-alt overflow-hidden">

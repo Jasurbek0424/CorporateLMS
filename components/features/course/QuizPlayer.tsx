@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, XCircle, ArrowRight, RotateCcw, Sparkles } from "lucide-react";
 import type { Question } from "@/lib/types";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n";
 
 interface QuizPlayerProps {
   questions: Question[];
@@ -11,6 +12,7 @@ interface QuizPlayerProps {
 }
 
 export function QuizPlayer({ questions, onComplete }: QuizPlayerProps) {
+  const { t, locale } = useT();
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number | number[]>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
@@ -67,29 +69,32 @@ export function QuizPlayer({ questions, onComplete }: QuizPlayerProps) {
           {passed ? <CheckCircle2 size={26} /> : <RotateCcw size={24} />}
         </div>
         <h3 className="text-xl font-bold tracking-tight">
-          {passed ? "Тест сдан" : "Нужно повторить материал"}
+          {passed ? t("quiz.passed") : t("quiz.failed")}
         </h3>
         <p className="text-ink-soft text-[14px] mt-1 mb-5">
-          Правильных ответов: <b className="tabular-nums text-ink">{Math.round(score)}%</b> ·
-          проходной порог 80%.
+          {t("quiz.result")}<b className="tabular-nums text-ink">{Math.round(score)}%</b> · {t("quiz.passing")}
         </p>
         <div className="flex items-center gap-2">
           <button onClick={restart} className="btn btn-outline">
-            <RotateCcw size={15} /> Пройти заново
+            <RotateCcw size={15} /> {t("quiz.retry")}
           </button>
           <button onClick={restart} className="btn btn-primary">
-            Продолжить курс <ArrowRight size={15} />
+            {t("quiz.continue")} <ArrowRight size={15} />
           </button>
         </div>
       </div>
     );
   }
 
+  const prompt = locale === "uz" && q.promptUz ? q.promptUz : q.prompt;
+  const options = locale === "uz" && q.optionsUz ? q.optionsUz : q.options;
+  const explanation = locale === "uz" && q.explanationUz ? q.explanationUz : q.explanation;
+
   return (
     <div className="card !p-6 anim-fade-up">
       <div className="flex items-center justify-between mb-4">
         <div className="text-[11px] uppercase tracking-[0.14em] font-semibold text-brand-600">
-          Вопрос {index + 1} из {questions.length}
+          {t("quiz.questionN", { n: index + 1, total: questions.length })}
         </div>
         <div className="flex items-center gap-1">
           {questions.map((_, i) => (
@@ -104,13 +109,13 @@ export function QuizPlayer({ questions, onComplete }: QuizPlayerProps) {
         </div>
       </div>
 
-      <h3 className="text-[17px] font-semibold leading-snug mb-1">{q.prompt}</h3>
+      <h3 className="text-[17px] font-semibold leading-snug mb-1">{prompt}</h3>
       <div className="text-[12.5px] text-ink-mute mb-5">
-        {q.type === "multiple_answer" ? "Несколько правильных ответов" : "Один правильный ответ"}
+        {q.type === "multiple_answer" ? t("quiz.hintMulti") : t("quiz.hintSingle")}
       </div>
 
       <div className="space-y-2 mb-5">
-        {q.options?.map((opt, i) => {
+        {options?.map((opt, i) => {
           const checked =
             q.type === "multiple_answer"
               ? Array.isArray(userAnswer) && userAnswer.includes(i)
@@ -155,21 +160,21 @@ export function QuizPlayer({ questions, onComplete }: QuizPlayerProps) {
         })}
       </div>
 
-      {isRevealed && q.explanation && (
+      {isRevealed && explanation && (
         <div className="rounded-xl bg-brand-50 border border-brand-100 p-3.5 mb-5 flex gap-3">
           <Sparkles size={16} className="text-brand-600 shrink-0 mt-0.5" />
           <div className="text-[13px] leading-relaxed text-brand-900">
             <div className="text-[10.5px] uppercase tracking-[0.14em] font-semibold text-brand-700 mb-0.5">
-              Объяснение
+              {t("quiz.explanation")}
             </div>
-            {q.explanation}
+            {explanation}
           </div>
         </div>
       )}
 
       <div className="flex items-center justify-between">
         <div className="text-[12px] text-ink-mute">
-          {!isRevealed ? "Выберите ответ и проверьте" : "Готово к следующему шагу"}
+          {!isRevealed ? t("quiz.selectAndCheck") : t("quiz.readyNext")}
         </div>
         {!isRevealed ? (
           <button
@@ -177,11 +182,11 @@ export function QuizPlayer({ questions, onComplete }: QuizPlayerProps) {
             disabled={userAnswer === undefined || (Array.isArray(userAnswer) && userAnswer.length === 0)}
             className="btn btn-primary"
           >
-            Проверить ответ
+            {t("quiz.checkAnswer")}
           </button>
         ) : (
           <button onClick={next} className="btn btn-primary">
-            {index < questions.length - 1 ? "Следующий вопрос" : "Завершить тест"}
+            {index < questions.length - 1 ? t("quiz.nextQuestion") : t("quiz.finish")}
             <ArrowRight size={15} />
           </button>
         )}

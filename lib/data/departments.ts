@@ -1,17 +1,17 @@
 import type { Department, DepartmentCompletion } from "@/lib/types";
 
 export const departments: Department[] = [
-  { id: "d-hq", name: "Головной офис", parentId: null, headcount: 1247 },
-  { id: "d-prod", name: "Производство", parentId: "d-hq", headcount: 599 },
-  { id: "d-prod-1", name: "Цех №1", parentId: "d-prod", headcount: 312 },
-  { id: "d-prod-2", name: "Цех №2", parentId: "d-prod", headcount: 287 },
-  { id: "d-log", name: "Логистика и склад", parentId: "d-hq", headcount: 148 },
-  { id: "d-buy", name: "Закупки", parentId: "d-hq", headcount: 52 },
-  { id: "d-fin", name: "Финансы и бухгалтерия", parentId: "d-hq", headcount: 73 },
-  { id: "d-geo", name: "Геолого-разведка", parentId: "d-hq", headcount: 94 },
-  { id: "d-safety", name: "Безопасность труда", parentId: "d-hq", headcount: 38 },
-  { id: "d-it", name: "ИТ-департамент", parentId: "d-hq", headcount: 61 },
-  { id: "d-hr", name: "HR и обучение", parentId: "d-hq", headcount: 24 },
+  { id: "d-hq", name: "Головной офис", nameUz: "Bosh ofis", parentId: null, headcount: 1247 },
+  { id: "d-prod", name: "Производство", nameUz: "Ishlab chiqarish", parentId: "d-hq", headcount: 599 },
+  { id: "d-prod-1", name: "Цех №1", nameUz: "1-sex", parentId: "d-prod", headcount: 312 },
+  { id: "d-prod-2", name: "Цех №2", nameUz: "2-sex", parentId: "d-prod", headcount: 287 },
+  { id: "d-log", name: "Логистика и склад", nameUz: "Logistika va ombor", parentId: "d-hq", headcount: 148 },
+  { id: "d-buy", name: "Закупки", nameUz: "Xaridlar", parentId: "d-hq", headcount: 52 },
+  { id: "d-fin", name: "Финансы и бухгалтерия", nameUz: "Moliya va buxgalteriya", parentId: "d-hq", headcount: 73 },
+  { id: "d-geo", name: "Геолого-разведка", nameUz: "Geologik qidiruv", parentId: "d-hq", headcount: 94 },
+  { id: "d-safety", name: "Безопасность труда", nameUz: "Mehnat xavfsizligi", parentId: "d-hq", headcount: 38 },
+  { id: "d-it", name: "ИТ-департамент", nameUz: "AT departamenti", parentId: "d-hq", headcount: 61 },
+  { id: "d-hr", name: "HR и обучение", nameUz: "HR va o'qitish", parentId: "d-hq", headcount: 24 },
 ];
 
 export const departmentCompletion: DepartmentCompletion[] = [
@@ -27,11 +27,17 @@ export function getDepartmentById(id: string): Department | undefined {
   return departments.find((d) => d.id === id);
 }
 
-export function getDepartmentPath(id: string): string {
+export function depName(d: Department | undefined, locale: "uz" | "ru" = "uz"): string {
+  if (!d) return "";
+  return locale === "uz" && d.nameUz ? d.nameUz : d.name;
+}
+
+export function getDepartmentPath(id: string, locale: "uz" | "ru" = "uz"): string {
   const node = getDepartmentById(id);
   if (!node) return "";
-  if (!node.parentId) return node.name;
-  return `${getDepartmentPath(node.parentId)} · ${node.name}`;
+  const name = depName(node, locale);
+  if (!node.parentId) return name;
+  return `${getDepartmentPath(node.parentId, locale)} · ${name}`;
 }
 
 export function getDepartmentChildren(parentId: string | null): Department[] {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
+import { LocaleProvider } from "@/lib/i18n";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -16,9 +17,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Mars Forge LMS · Корпоративное обучение",
+  title: "Mars Forge LMS · Korporativ ta'lim",
   description:
-    "Корпоративная платформа обучения с ИИ-импортом документов. Каталог курсов, отчётность, оргструктура.",
+    "AI hujjat importi bilan korporativ o'qitish platformasi. Kurslar katalogi, hisobotlar, tashkilot tuzilmasi.",
 };
 
 export default function RootLayout({
@@ -27,8 +28,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className={`${inter.variable} ${manrope.variable}`}>
-      <body className="min-h-full">{children}</body>
+    <html lang="uz" className={`${inter.variable} ${manrope.variable}`}>
+      <body className="min-h-full">
+        <LocaleProvider>{children}</LocaleProvider>
+      </body>
     </html>
   );
 }

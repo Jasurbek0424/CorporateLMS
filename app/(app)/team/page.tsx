@@ -8,10 +8,12 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Progress } from "@/components/ui/Progress";
 import { Chip } from "@/components/ui/Chip";
 import { api } from "@/lib/api";
-import { getDepartmentById } from "@/lib/data";
+import { depName, getDepartmentById } from "@/lib/data";
 import type { Employee } from "@/lib/types";
+import { useT } from "@/lib/i18n";
 
 export default function TeamPage() {
+  const { t, locale } = useT();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -26,19 +28,18 @@ export default function TeamPage() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return employees;
-    return employees.filter(
-      (e) =>
-        e.fullName.toLowerCase().includes(q) ||
-        e.position.toLowerCase().includes(q),
-    );
-  }, [employees, query]);
+    return employees.filter((e) => {
+      const pos = (locale === "uz" && e.positionUz ? e.positionUz : e.position).toLowerCase();
+      return e.fullName.toLowerCase().includes(q) || pos.includes(q);
+    });
+  }, [employees, query, locale]);
 
   return (
     <>
       <PageHeader
-        eyebrow="Команда"
-        title="Сотрудники"
-        description="Назначенные курсы, средний балл, обязательные программы. Кликните по строке для перехода в карточку."
+        eyebrow={t("team.eyebrow")}
+        title={t("team.title")}
+        description={t("team.desc")}
       />
 
       <div className="card !p-3 mb-4 flex items-center gap-3">
@@ -47,12 +48,12 @@ export default function TeamPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск по ФИО или должности"
+            placeholder={t("team.search.placeholder")}
             className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-alt border border-transparent text-sm focus:bg-white focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-50"
           />
         </div>
         <button className="btn btn-outline">
-          <Filter size={14} /> Фильтры
+          <Filter size={14} /> {t("common.filters")}
         </button>
       </div>
 
@@ -60,11 +61,11 @@ export default function TeamPage() {
         <table className="w-full">
           <thead>
             <tr className="text-left text-[10.5px] uppercase tracking-[0.14em] font-semibold text-ink-mute border-b border-border bg-surface-alt/50">
-              <th className="py-3 px-5">Сотрудник</th>
-              <th className="py-3 px-3">Подразделение</th>
-              <th className="py-3 px-3">Обязательные</th>
-              <th className="py-3 px-3 w-[200px]">Освоение</th>
-              <th className="py-3 px-3">Средний балл</th>
+              <th className="py-3 px-5">{t("team.col.employee")}</th>
+              <th className="py-3 px-3">{t("team.col.department")}</th>
+              <th className="py-3 px-3">{t("team.col.required")}</th>
+              <th className="py-3 px-3 w-[200px]">{t("team.col.completion")}</th>
+              <th className="py-3 px-3">{t("team.col.avgScore")}</th>
               <th className="py-3 px-3 w-10" />
             </tr>
           </thead>
@@ -82,6 +83,7 @@ export default function TeamPage() {
                 const dep = getDepartmentById(e.departmentId);
                 const requiredPct = Math.round((e.required.done / e.required.total) * 100);
                 const compPct = Math.round((e.completed / e.assigned) * 100);
+                const pos = locale === "uz" && e.positionUz ? e.positionUz : e.position;
                 return (
                   <tr
                     key={e.id}
@@ -94,11 +96,11 @@ export default function TeamPage() {
                           <div className="font-semibold text-ink group-hover:text-brand-700 transition leading-tight">
                             {e.fullName}
                           </div>
-                          <div className="text-[12px] text-ink-mute">{e.position}</div>
+                          <div className="text-[12px] text-ink-mute">{pos}</div>
                         </div>
                       </Link>
                     </td>
-                    <td className="px-3 py-3.5 text-ink-soft">{dep?.name ?? "—"}</td>
+                    <td className="px-3 py-3.5 text-ink-soft">{depName(dep, locale)}</td>
                     <td className="px-3 py-3.5">
                       {e.required.done === e.required.total ? (
                         <Chip tone="green">

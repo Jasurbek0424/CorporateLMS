@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   UploadCloud,
   FileText,
@@ -20,6 +20,8 @@ import type { ImportedCourseDraft } from "@/lib/types";
 import { Chip } from "@/components/ui/Chip";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n";
+import type { DictKey } from "@/lib/i18n/uz";
 
 type Phase = "idle" | "uploading" | "analyzing" | "generating" | "ready";
 
@@ -30,13 +32,13 @@ interface PreparedFile {
   ext: string;
 }
 
-const PIPELINE_STEPS = [
-  { key: "extract", label: "Извлечение текста из документов", icon: FileText },
-  { key: "structure", label: "Построение структуры модулей", icon: ListChecks },
-  { key: "summarize", label: "Генерация конспектов уроков", icon: Brain },
-  { key: "questions", label: "Формулировка проверочных вопросов", icon: FileQuestion },
-  { key: "translate", label: "Подготовка переводов · UZ · EN", icon: Languages },
-] as const;
+const PIPELINE_STEPS: { key: string; labelKey: DictKey; icon: typeof FileText }[] = [
+  { key: "extract", labelKey: "import.step.extract", icon: FileText },
+  { key: "structure", labelKey: "import.step.structure", icon: ListChecks },
+  { key: "summarize", labelKey: "import.step.summarize", icon: Brain },
+  { key: "questions", labelKey: "import.step.questions", icon: FileQuestion },
+  { key: "translate", labelKey: "import.step.translate", icon: Languages },
+];
 
 const ALLOWED = /\.(pdf|docx?|pptx?)$/i;
 
@@ -53,6 +55,7 @@ function bytesToHuman(b: number): string {
 }
 
 export function ImportFlow() {
+  const { t } = useT();
   const [files, setFiles] = useState<PreparedFile[]>([]);
   const [phase, setPhase] = useState<Phase>("idle");
   const [stepIndex, setStepIndex] = useState(-1);
@@ -97,7 +100,6 @@ export function ImportFlow() {
     setPhase("uploading");
     setStepIndex(-1);
 
-    // Simulate per-step pipeline
     for (let i = 0; i < PIPELINE_STEPS.length; i++) {
       setStepIndex(i);
       setPhase(i === 0 ? "uploading" : i === 1 ? "analyzing" : "generating");
@@ -110,15 +112,12 @@ export function ImportFlow() {
   }
 
   function publish() {
-    alert(
-      "В прототипе публикация имитируется. Курс отправлен в каталог и доступен для назначения.",
-    );
+    alert(t("import.publishAlert"));
     reset();
   }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-5">
-      {/* Left: upload + files */}
       <div className="space-y-4">
         <div
           onDragOver={(e) => {
@@ -149,13 +148,11 @@ export function ImportFlow() {
             >
               <UploadCloud size={26} />
             </div>
-            <h3 className="text-[17px] font-bold tracking-tight">Перетащите документы сюда</h3>
-            <p className="text-[13px] text-ink-soft mt-1">
-              PDF · Word · PowerPoint · Confluence · HTML
-            </p>
+            <h3 className="text-[17px] font-bold tracking-tight">{t("import.drop.title")}</h3>
+            <p className="text-[13px] text-ink-soft mt-1">{t("import.drop.sub")}</p>
             <div className="mt-4 flex items-center justify-center gap-2">
               <button onClick={() => inputRef.current?.click()} className="btn btn-primary">
-                Выбрать файлы
+                {t("import.drop.pickFiles")}
               </button>
               <button
                 onClick={() => {
@@ -163,7 +160,7 @@ export function ImportFlow() {
                 }}
                 className="btn btn-outline"
               >
-                <Sparkles size={14} /> Демо-документы
+                <Sparkles size={14} /> {t("import.drop.demo")}
               </button>
             </div>
           </div>
@@ -173,14 +170,14 @@ export function ImportFlow() {
           <div className="card !p-0 overflow-hidden anim-fade-up">
             <div className="px-4 py-3 border-b border-border flex items-center justify-between">
               <div className="text-[11px] uppercase tracking-[0.14em] font-semibold text-ink-mute">
-                Загружено · {files.length}
+                {t("import.list.uploaded", { n: files.length })}
               </div>
               {phase === "idle" && (
                 <button
                   onClick={reset}
                   className="text-[11px] uppercase tracking-[0.14em] font-semibold text-ink-mute hover:text-danger"
                 >
-                  Очистить
+                  {t("import.list.clear")}
                 </button>
               )}
             </div>
@@ -217,12 +214,11 @@ export function ImportFlow() {
 
         {phase === "idle" && files.length > 0 && (
           <button onClick={startAnalyze} className="btn btn-primary w-full !h-12">
-            <Sparkles size={16} /> Запустить ИИ-импорт
+            <Sparkles size={16} /> {t("import.start")}
           </button>
         )}
       </div>
 
-      {/* Right: pipeline + draft */}
       <div className="space-y-4">
         <div className="card !p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -230,13 +226,13 @@ export function ImportFlow() {
               <Brain size={18} />
             </div>
             <div>
-              <h3 className="text-[15px] font-semibold leading-tight">ИИ-pipeline</h3>
+              <h3 className="text-[15px] font-semibold leading-tight">{t("import.pipeline.title")}</h3>
               <p className="text-[12px] text-ink-soft">
                 {phase === "ready"
-                  ? "Готово. Можно просматривать структуру курса."
+                  ? t("import.pipeline.ready")
                   : phase === "idle"
-                    ? "Загрузите документы для запуска."
-                    : "Обрабатываем материалы…"}
+                    ? t("import.pipeline.idle")
+                    : t("import.pipeline.processing")}
               </p>
             </div>
           </div>
@@ -283,9 +279,9 @@ export function ImportFlow() {
                     )}
                   </span>
                   <div className="flex-1">
-                    <div className="text-[13.5px] font-medium">{s.label}</div>
+                    <div className="text-[13.5px] font-medium">{t(s.labelKey)}</div>
                     {status === "active" && (
-                      <div className="text-[11.5px] text-brand-700 mt-0.5">Обрабатываем · ИИ-агент</div>
+                      <div className="text-[11.5px] text-brand-700 mt-0.5">{t("import.step.processing")}</div>
                     )}
                   </div>
                   <span
@@ -298,7 +294,11 @@ export function ImportFlow() {
                           : "text-ink-mute",
                     )}
                   >
-                    {status === "done" ? "готово" : status === "active" ? "в работе" : "ожидание"}
+                    {status === "done"
+                      ? t("import.step.done")
+                      : status === "active"
+                        ? t("import.step.active")
+                        : t("import.step.pending")}
                   </span>
                 </li>
               );
@@ -321,21 +321,25 @@ function DraftPreview({
   onPublish: () => void;
   onReset: () => void;
 }) {
+  const { t } = useT();
   return (
     <div className="card !p-5 anim-fade-up">
       <div className="flex items-start justify-between mb-4">
         <div>
           <div className="text-[10.5px] uppercase tracking-[0.14em] font-semibold text-brand-600 mb-1">
-            Черновик курса
+            {t("import.draft.eyebrow")}
           </div>
           <h3 className="text-[18px] font-bold tracking-tight leading-tight">{draft.title}</h3>
           <p className="text-[12.5px] text-ink-soft mt-1">
-            {draft.modules.length} модулей · {draft.questionsCount} проверочных вопросов · из{" "}
-            {draft.sourceFiles.length} документов
+            {t("import.draft.meta", {
+              m: draft.modules.length,
+              q: draft.questionsCount,
+              f: draft.sourceFiles.length,
+            })}
           </p>
         </div>
         <Chip tone="green">
-          <CheckCircle2 size={11} /> Сгенерировано
+          <CheckCircle2 size={11} /> {t("import.draft.generated")}
         </Chip>
       </div>
 
@@ -351,26 +355,26 @@ function DraftPreview({
             <div className="flex-1">
               <div className="text-[13.5px] font-semibold">{m.title}</div>
               <div className="text-[11.5px] text-ink-mute mt-0.5">
-                {m.lessonsCount} уроков · конспекты ИИ
+                {t("import.draft.lessonsCount", { n: m.lessonsCount })}
               </div>
             </div>
-            <Chip tone={m.status === "ready" ? "green" : "gray"}>{m.status === "ready" ? "готов" : "черновик"}</Chip>
+            <Chip tone={m.status === "ready" ? "green" : "gray"}>
+              {m.status === "ready" ? t("import.draft.statusReady") : t("import.draft.statusDraft")}
+            </Chip>
           </li>
         ))}
       </ol>
 
       <div className="flex items-center gap-2">
         <button onClick={onPublish} className="btn btn-primary flex-1">
-          <Rocket size={15} /> Опубликовать и назначить
+          <Rocket size={15} /> {t("import.draft.publish")}
         </button>
         <button onClick={onReset} className="btn btn-outline">
-          Сбросить
+          {t("import.draft.reset")}
         </button>
       </div>
 
-      <p className="text-[11.5px] text-ink-mute mt-3">
-        После публикации курс попадёт в каталог. Перед массовым назначением рекомендуется ревью методиста.
-      </p>
+      <p className="text-[11.5px] text-ink-mute mt-3">{t("import.draft.note")}</p>
     </div>
   );
 }

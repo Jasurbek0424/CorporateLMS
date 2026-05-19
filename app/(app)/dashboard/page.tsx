@@ -16,8 +16,10 @@ import { RecentActivity } from "@/components/features/dashboard/RecentActivity";
 import { api } from "@/lib/api";
 import type { ActivityEvent, Course, Department, DepartmentCompletion, Employee } from "@/lib/types";
 import { formatNumber } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 
 export default function DashboardPage() {
+  const { t, locale } = useT();
   const [data, setData] = useState<{
     courses: Course[];
     employees: Employee[];
@@ -67,16 +69,16 @@ export default function DashboardPage() {
   return (
     <>
       <PageHeader
-        eyebrow="III квартал 2026"
-        title="Обзор по предприятию"
-        description="Кто из сотрудников какие курсы прошёл, где «провалы», какие подразделения отстают. Drill-in до конкретного сотрудника и теста."
+        eyebrow={t("dash.eyebrow")}
+        title={t("dash.title")}
+        description={t("dash.desc")}
         actions={
           <>
             <button className="btn btn-outline">
-              <Calendar size={15} /> Квартал
+              <Calendar size={15} /> {t("common.quarter")}
             </button>
             <button className="btn btn-primary">
-              <Download size={15} /> Выгрузить в Excel
+              <Download size={15} /> {t("common.exportExcel")}
             </button>
           </>
         }
@@ -84,28 +86,28 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <KpiTile
-          label="Активных курсов"
+          label={t("dash.kpi.activeCourses")}
           value={activeCourses}
-          delta={{ value: "+8 за квартал", positive: true }}
+          delta={{ value: t("dash.kpi.activeCoursesDelta"), positive: true }}
           icon={<BookOpen size={16} className="text-brand-600" />}
         />
         <KpiTile
-          label="Назначено"
-          value={formatNumber(totalAssigned)}
-          subtitle="94% штата"
+          label={t("dash.kpi.assigned")}
+          value={formatNumber(totalAssigned, locale)}
+          subtitle={t("dash.kpi.staffPct")}
           icon={<Users size={16} className="text-brand-600" />}
         />
         <KpiTile
-          label="Уровень освоения"
+          label={t("dash.kpi.completion")}
           value={`${avgCompletion}%`}
-          delta={{ value: "+11 pp", positive: true }}
+          delta={{ value: t("dash.kpi.completionDelta"), positive: true }}
           icon={<TrendingUp size={16} className="text-success" />}
           tone="success"
         />
         <KpiTile
-          label="Просроченные"
+          label={t("dash.kpi.overdue")}
           value={overdueCount * 12 + 1}
-          subtitle="внимание"
+          subtitle={t("dash.kpi.overdueWarn")}
           icon={<AlertOctagon size={16} className="text-danger" />}
           tone="danger"
         />
@@ -119,20 +121,20 @@ export default function DashboardPage() {
       <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
         <ProblemCard
           tone="danger"
-          title="Срочно: 3 группы отстают"
-          description="«Безопасность труда» — 31% освоения, дедлайн через 5 дней."
+          title={t("dash.problem.urgent.title")}
+          description={t("dash.problem.urgent.desc")}
           metric="−14 pp"
         />
         <ProblemCard
           tone="warn"
-          title="Возможный риск пересдачи"
-          description="«Экзамен по нормам безопасности» — у 12 сотрудников балл ниже 70."
-          metric="12 чел"
+          title={t("dash.problem.risk.title")}
+          description={t("dash.problem.risk.desc")}
+          metric={t("dash.problem.risk.metric")}
         />
         <ProblemCard
           tone="success"
-          title="Лучший результат"
-          description="Цех №1 — 92% за квартал, рост +18 pp. Менеджер: Турсунов Д. Э."
+          title={t("dash.problem.best.title")}
+          description={t("dash.problem.best.desc")}
           metric="+18 pp"
         />
       </div>

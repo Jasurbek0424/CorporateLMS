@@ -3,6 +3,7 @@
 import { CheckCircle2, Circle, FileText, HelpCircle, PlayCircle } from "lucide-react";
 import type { Lesson, Module } from "@/lib/types";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n";
 
 interface CourseSidebarProps {
   modules: Module[];
@@ -19,11 +20,12 @@ const KIND_ICON = {
 } as const;
 
 export function CourseSidebar({ modules, activeLessonId, completed, onSelect }: CourseSidebarProps) {
+  const { t } = useT();
   return (
     <nav className="card !p-0 sticky top-24 overflow-hidden">
       <div className="px-4 py-3.5 border-b border-border">
         <div className="text-[10.5px] uppercase tracking-[0.14em] font-semibold text-ink-mute">
-          Содержание
+          {t("course.sidebar.contents")}
         </div>
       </div>
       <div className="max-h-[calc(100vh-220px)] overflow-y-auto py-1">
@@ -55,13 +57,15 @@ function ModuleSection({
   completed: Set<string>;
   onSelect: (id: string) => void;
 }) {
+  const { locale } = useT();
+  const mTitle = locale === "uz" && module.titleUz ? module.titleUz : module.title;
   return (
     <div className="px-2 py-1.5">
       <div className="flex items-center gap-2 px-3 py-2">
         <span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-brand-50 text-brand-700 text-[10.5px] font-semibold">
           {index + 1}
         </span>
-        <div className="text-[13px] font-semibold leading-tight">{module.title}</div>
+        <div className="text-[13px] font-semibold leading-tight">{mTitle}</div>
       </div>
       <ul>
         {module.lessons.map((l) => (
@@ -89,7 +93,15 @@ function LessonRow({
   done: boolean;
   onSelect: (id: string) => void;
 }) {
+  const { t, locale } = useT();
   const Icon = KIND_ICON[lesson.kind];
+  const lTitle = locale === "uz" && lesson.titleUz ? lesson.titleUz : lesson.title;
+  const kindLabel =
+    lesson.kind === "quiz"
+      ? t("course.lesson.kind.quiz")
+      : lesson.kind === "video"
+        ? t("course.lesson.kind.video")
+        : t("course.lesson.kind.text");
   return (
     <li>
       <button
@@ -110,13 +122,12 @@ function LessonRow({
         </span>
         <span className="flex-1 min-w-0">
           <span className={cn("block text-[13px] leading-tight font-medium", active && "text-brand-800")}>
-            {lesson.title}
+            {lTitle}
           </span>
           <span className="flex items-center gap-1.5 mt-1 text-[11px] text-ink-mute">
             <Icon size={11} />
             <span>
-              {lesson.kind === "quiz" ? "Тест" : lesson.kind === "video" ? "Видео" : "Урок"} ·{" "}
-              {lesson.durationMin} мин
+              {kindLabel} · {lesson.durationMin} {t("common.minutesShort")}
             </span>
           </span>
         </span>

@@ -3,42 +3,37 @@
 import { Sparkles, Languages, Bot, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ImportFlow } from "@/components/features/admin/ImportFlow";
+import { useT } from "@/lib/i18n";
+import type { DictKey } from "@/lib/i18n/uz";
 
-const AI_FEATURES = [
-  {
-    code: "α",
-    name: "AI Course Generation",
-    desc: "PDF · Word · PPTX → структура курса, конспекты, рерайт.",
-    Icon: Sparkles,
-  },
-  {
-    code: "β",
-    name: "AI Knowledge Checks",
-    desc: "Автогенерация вопросов 6 типов с регулировкой сложности.",
-    Icon: Bot,
-  },
-  {
-    code: "δ",
-    name: "AI Translation & Voiceover",
-    desc: "Перевод и озвучка курса: UZ · RU · EN из коробки.",
-    Icon: Languages,
-  },
+interface Feature {
+  code: string;
+  nameKey: DictKey;
+  descKey: DictKey;
+  Icon: typeof Sparkles;
+}
+
+const AI_FEATURES: Feature[] = [
+  { code: "α", nameKey: "import.ai.gen.name", descKey: "import.ai.gen.desc", Icon: Sparkles },
+  { code: "β", nameKey: "import.ai.checks.name", descKey: "import.ai.checks.desc", Icon: Bot },
+  { code: "δ", nameKey: "import.ai.tr.name", descKey: "import.ai.tr.desc", Icon: Languages },
 ];
 
 export default function AdminImportPage() {
+  const { t } = useT();
   return (
     <>
       <PageHeader
-        eyebrow="Контент · импорт"
-        title="ИИ-импорт документов"
-        description="Перетащите PDF, Word и презентации — система разберёт их на модули и уроки, сделает конспекты, сформулирует проверочные вопросы. Администратор просматривает, правит, публикует."
+        eyebrow={t("adminImport.eyebrow")}
+        title={t("adminImport.title")}
+        description={t("adminImport.desc")}
       />
 
       <ImportFlow />
 
       <div className="mt-8">
         <div className="text-[11px] uppercase tracking-[0.16em] font-semibold text-ink-mute mb-3">
-          ИИ-фичи внутри платформы
+          {t("adminImport.features")}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {AI_FEATURES.map((f) => (
@@ -47,8 +42,8 @@ export default function AdminImportPage() {
                 {f.code}
               </span>
               <div className="min-w-0">
-                <div className="text-[13.5px] font-semibold leading-tight">{f.name}</div>
-                <p className="text-[12.5px] text-ink-soft mt-1 leading-snug">{f.desc}</p>
+                <div className="text-[13.5px] font-semibold leading-tight">{t(f.nameKey)}</div>
+                <p className="text-[12.5px] text-ink-soft mt-1 leading-snug">{t(f.descKey)}</p>
               </div>
             </div>
           ))}
@@ -56,10 +51,7 @@ export default function AdminImportPage() {
 
         <div className="card !p-4 mt-3 flex items-start gap-3 bg-brand-50/40 border-brand-100">
           <ShieldCheck size={18} className="text-success shrink-0 mt-0.5" />
-          <p className="text-[12.5px] text-ink-soft">
-            ИИ-обработка идёт через изолированный контур (zero-retention API или локальный
-            Llama/Qwen в вашем контуре). Документы не покидают периметр заказчика.
-          </p>
+          <p className="text-[12.5px] text-ink-soft">{t("adminImport.secure")}</p>
         </div>
       </div>
     </>

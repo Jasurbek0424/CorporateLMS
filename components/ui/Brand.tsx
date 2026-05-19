@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n";
 
 interface BrandProps {
   className?: string;
@@ -28,13 +31,14 @@ export function BrandMark({ className }: { className?: string }) {
 }
 
 export function Brand({ className, compact }: BrandProps) {
+  const { t } = useT();
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
       <BrandMark />
       {!compact && (
         <div className="leading-tight">
           <div className="text-[15px] font-semibold tracking-tight">Mars Forge</div>
-          <div className="text-[11px] text-ink-mute uppercase tracking-[0.12em]">Corporate LMS</div>
+          <div className="text-[11px] text-ink-mute uppercase tracking-[0.12em]">{t("brand.tagline")}</div>
         </div>
       )}
     </div>

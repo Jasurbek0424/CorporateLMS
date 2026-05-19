@@ -28,6 +28,7 @@ export type QuestionType =
 export interface Department {
   id: string;
   name: string;
+  nameUz?: string;
   parentId: string | null;
   headcount: number;
 }
@@ -37,8 +38,10 @@ export interface Employee {
   fullName: string;
   initials: string;
   position: string;
+  positionUz?: string;
   departmentId: string;
   tenure: string;
+  tenureUz?: string;
   avgScore: number;
   required: { done: number; total: number };
   assigned: number;
@@ -49,31 +52,40 @@ export interface Question {
   id: string;
   type: QuestionType;
   prompt: string;
+  promptUz?: string;
   options?: string[];
+  optionsUz?: string[];
   correct?: number | number[];
   explanation?: string;
+  explanationUz?: string;
 }
 
 export interface Lesson {
   id: string;
   title: string;
+  titleUz?: string;
   kind: "text" | "video" | "quiz" | "scorm";
   durationMin: number;
   body?: string;
+  bodyUz?: string;
   questions?: Question[];
 }
 
 export interface Module {
   id: string;
   title: string;
+  titleUz?: string;
   lessons: Lesson[];
 }
 
 export interface Course {
   id: string;
   title: string;
+  titleUz?: string;
   category: string;
+  categoryUz?: string;
   description: string;
+  descriptionUz?: string;
   modules: Module[];
   totalLessons: number;
   durationHours: number;
@@ -84,6 +96,7 @@ export interface Course {
   score?: number;
   completedAt?: string;
   authorTeam: string;
+  authorTeamUz?: string;
   tags: string[];
 }
 
@@ -96,13 +109,21 @@ export interface EmployeeCourseEntry {
   dueDate?: string;
 }
 
+export type ActivityActionKey =
+  | "examPassed"
+  | "courseAssigned"
+  | "deadlineOverdue"
+  | "moduleCompleted"
+  | "certIssued";
+
 export interface ActivityEvent {
   id: string;
   employeeId: string;
-  action: string;
+  actionKey: ActivityActionKey;
   courseId?: string;
   score?: number;
   at: string;
+  atUz?: string;
 }
 
 export interface DepartmentCompletion {

@@ -4,12 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
-import { getSession } from "@/lib/auth";
-import type { Session } from "@/lib/types";
+import { getSession, type StoredSession } from "@/lib/auth";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<StoredSession | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
